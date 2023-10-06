@@ -31,7 +31,10 @@ let print_page index (page : Page.t) =
   (* write the overview png *)
   Cairo.PNG.write surface @@ Printf.sprintf "page%i.png" index;
   (* write the data json *)
-  Yojson.to_file (Printf.sprintf "page%i.json" index) (Page.to_json page)
+  let json_string = Yojson.pretty_to_string (Page.to_json page) in
+  let file = open_out (Printf.sprintf "page%i.json" index) in
+  Printf.fprintf file "%s" json_string;
+  close_out file
 
 (* for command line arguments *)
 let usage_msg = "convert <pdf>"
