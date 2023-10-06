@@ -8,20 +8,48 @@ type t = {
 (* use this char width if nothing else is found*)
 let fallback_char_width = 400.0
 
-let get_simple_font_char_widths (simple_font : Pdftext.simple_font) code =
+(* invert a hashtable of type (int->string) to (int->int) so we can lookup the keys form the codepoints *)
+let to_codepoints_table table =
+  let inverted_table = Hashtbl.create (Hashtbl.length table) in
+  Hashtbl.iter
+    (fun key value ->
+      let codepoints = Pdftext.codepoints_of_utf8 value in
+      Hashtbl.add inverted_table (List.hd (List.tl codepoints)) key)
+    table;
+  inverted_table
+
+let get_simple_font_char_width (simple_font : Pdftext.simple_font) index =
   (* try via the 'width' member *)
-  try float_of_int @@ simple_font.widths.(code - simple_font.firstchar)
+  try float_of_int @@ simple_font.widths.(index - simple_font.firstchar)
   with Invalid_argument _ -> (
     match simple_font.fontmetrics with
     | None -> fallback_char_width
     | Some metrics -> (
         (* try to get the width from the matrics *)
-        try metrics.(code)
+        try metrics.(index)
         with (* nothing found, use fallback *)
         | Invalid_argument _ ->
           fallback_char_width))
 
+let get_cid_font_char_width (cid_font : Pdftext.composite_CIDfont) index =
+  let width_map = IntMap.of_list cid_font.cid_widths in
+  Option.value ~default:fallback_char_width @@ IntMap.find_opt index width_map
+
+let get_codepoint_to_width_index_fun font =
+  match font with
+  | Pdftext.StandardFont _ -> fun i -> i
+  | Pdftext.SimpleFont
+      { fontdescriptor = Some { tounicode = Some tounicode; _ }; _ } ->
+      let table = to_codepoints_table tounicode in
+      fun i -> Option.value ~default:i (Hashtbl.find_opt table i)
+  | CIDKeyedFont
+      (_, { cid_fontdescriptor = { tounicode = Some tounicode; _ }; _ }, _) ->
+      let table = to_codepoints_table tounicode in
+      fun i -> Option.value ~default:i (Hashtbl.find_opt table i)
+  | _ -> fun i -> i
+
 let create font font_size =
+  let ctwi = get_codepoint_to_width_index_fun font in
   let text_width =
     match font with
     | Pdftext.StandardFont (sf, ec) ->
@@ -34,18 +62,19 @@ let create font font_size =
         let tw codes _ =
           let milli_points =
             List.fold_left ( +. ) 0.0
-            @@ List.map (get_simple_font_char_widths simple_font) codes
+            @@ List.map
+                 (fun i -> get_simple_font_char_width simple_font @@ ctwi i)
+                 codes
           in
           milli_points *. font_size /. 1000.0
         in
         tw
-    | Pdftext.CIDKeyedFont (_, { cid_widths = w; _ }, _) ->
-        let w_map = IntMap.of_list w in
+    | Pdftext.CIDKeyedFont (_, cid_font, _) ->
         let tw codes _ =
           let milli_points =
             List.fold_left ( +. ) 0.
             @@ List.map
-                 (fun i -> Option.value ~default:0.0 @@ IntMap.find_opt i w_map)
+                 (fun i -> get_cid_font_char_width cid_font @@ ctwi i)
                  codes
           in
           milli_points *. font_size /. 1000.0

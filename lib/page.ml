@@ -3,11 +3,16 @@ type t = {
   text : TextElement.t list;
 }
 
+let number_of_pdf (obj : Pdf.pdfobject) =
+  match obj with
+  | Real x -> x
+  | Integer x -> float_of_int x
+  | _ -> raise @@ Invalid_argument "not a pdfobject with a number"
+
 let pdf_page_bounds (page : Pdfpage.t) =
   match page.mediabox with
-  | Array [ Real x; Real y; Real w; Real h ] -> ((x, y), (w, h))
-  | Array [ Integer x; Integer y; Integer w; Integer h ] ->
-      ((float_of_int x, float_of_int y), (float_of_int w, float_of_int h))
+  | Array [ a; b; c; d ] ->
+      ((number_of_pdf a, number_of_pdf b), (number_of_pdf c, number_of_pdf d))
   | _ -> raise @@ Invalid_argument "not a mediabox"
 
 let from_pdf_page pdf page =

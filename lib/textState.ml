@@ -98,6 +98,13 @@ let font_info text_state =
     (fun f -> FontInfo.create f text_state.font_size text_state.text_mode)
     text_state.font
 
+let font_range_from_descriptor (d : Pdftext.fontdescriptor) =
+  if abs_float (d.ascent -. d.descent) > 0.1 then (d.ascent, d.descent)
+  else
+    let _, d, _, a = d.fontbbox in
+    Printf.printf "bb: %f - %f\n" d a;
+    (a, d)
+
 let font_range text_state =
   (* get the range of the font in point/1000.0 *)
   let milli_acent, milli_descent =
@@ -106,18 +113,19 @@ let font_range text_state =
         let headers, _, _, _ = Pdfstandard14.afm_data sf in
         ( float_of_string @@ Hashtbl.find headers "Ascent",
           float_of_string @@ Hashtbl.find headers "Descent" )
-    | Some (Pdftext.SimpleFont { fontdescriptor = fc; _ }) -> (
-        match fc with
-        | None -> raise @@ Invalid_argument "no font selected"
-        | Some fc -> (fc.ascent, fc.descent))
-    | Some (Pdftext.CIDKeyedFont (_, { cid_fontdescriptor = fc; _ }, _)) ->
-        (fc.ascent, fc.descent)
+    | Some (Pdftext.SimpleFont { fontdescriptor = Some d; _ }) ->
+        font_range_from_descriptor d
+    | Some (Pdftext.CIDKeyedFont (_, { cid_fontdescriptor = d; _ }, _)) ->
+        font_range_from_descriptor d
     | _ -> (1000.0, 0.0)
   in
-  if milli_descent != milli_descent then
+  Printf.printf "%f - %f\n" milli_acent milli_descent;
+  if abs_float (milli_acent -. milli_descent) > 0.1 then
     ( (text_state.font_size *. milli_acent /. 1000.0) +. text_state.rise,
       (text_state.font_size *. milli_descent /. 1000.0) +. text_state.rise )
-  else (1.0, 0.0)
+  else (
+    print_endline "the same";
+    (text_state.font_size, 0.0))
 
 let apply_text_transform text_state (x, y) =
   Pdftransform.transform_matrix text_state.text_matrix (x, y)
