@@ -64,33 +64,24 @@ let reset_transforms text_state =
     line_matrix = Pdftransform.i_matrix;
   }
 
-let advance text_state dist =
-  {
-    text_state with
-    text_matrix =
-      Pdftransform.matrix_compose text_state.text_matrix
-      @@ Pdftransform.matrix_of_op
-      @@ Translate (dist, 0.0);
-  }
-
 let translate text_state x y =
   let new_m =
     Pdftransform.matrix_compose text_state.line_matrix
-    @@ Pdftransform.matrix_of_op
-    @@ Translate (x, y)
+      (Pdftransform.mktranslate x y)
   in
   { text_state with text_matrix = new_m; line_matrix = new_m }
+
+let advance text_state dist =
+  let new_m =
+    Pdftransform.matrix_compose text_state.text_matrix
+      (Pdftransform.mktranslate dist 0.0)
+  in
+  { text_state with text_matrix = new_m }
 
 let with_transform text_state new_m =
   { text_state with text_matrix = new_m; line_matrix = new_m }
 
-let newline text_state =
-  let new_m =
-    Pdftransform.matrix_compose text_state.line_matrix
-    @@ Pdftransform.matrix_of_op
-    @@ Translate (0., -.text_state.leading)
-  in
-  { text_state with line_matrix = new_m; text_matrix = new_m }
+let newline text_state = translate text_state 0.0 (-.text_state.leading)
 
 let get_text_and_advance text_state (obj : Pdf.pdfobject) =
   match text_state.text_extractor with
@@ -113,9 +104,6 @@ let font_range text_state =
     match text_state.font with
     | Some (Pdftext.StandardFont (sf, _)) ->
         let headers, _, _, _ = Pdfstandard14.afm_data sf in
-        Printf.printf "A/D: %s %s"
-          (Hashtbl.find headers "Ascent")
-          (Hashtbl.find headers "Descent");
         ( float_of_string @@ Hashtbl.find headers "Ascent",
           float_of_string @@ Hashtbl.find headers "Descent" )
     | Some (Pdftext.SimpleFont { fontdescriptor = fc; _ }) -> (
