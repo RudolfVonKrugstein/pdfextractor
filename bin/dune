@@ -1,4 +1,4 @@
 (executable
  (public_name convert)
- (name main)
+ (name convert)
  (libraries camlpdf pdfextractor cairo2))

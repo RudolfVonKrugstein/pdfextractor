@@ -27,7 +27,10 @@ let print_page index (page : Page.t) =
       Cairo.move_to cr x1 (h -. y1);
       Cairo.show_text cr t.text)
     page.text;
-  Cairo.PNG.write surface @@ Printf.sprintf "page%i.png" index
+  (* write the overview png*)
+  Cairo.PNG.write surface @@ Printf.sprintf "page%i.png" index;
+  (* write the data json *)
+  Yojson.to_file (Printf.sprintf "page%i.json" index) (Page.to_json page)
 
 (* for command line arguments *)
 let usage_msg = "convert <pdf>"
@@ -42,7 +45,6 @@ let () =
     | "" -> raise @@ Invalid_argument "missing pdf file argument"
     | s -> PdfLoader.load_maybe_encrypted_pdf s None
   in
-  Printf.printf "encrypted: %b" @@ Pdfcrypt.is_encrypted pdf;
   let pages =
     List.map (Page.from_pdf_page pdf) @@ Pdfpage.pages_of_pagetree pdf
   in
