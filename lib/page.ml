@@ -6,6 +6,8 @@ type t = {
 let pdf_page_bounds (page : Pdfpage.t) =
   match page.mediabox with
   | Array [ Real x; Real y; Real w; Real h ] -> ((x, y), (w, h))
+  | Array [ Integer x; Integer y; Integer w; Integer h ] ->
+      ((float_of_int x, float_of_int y), (float_of_int w, float_of_int h))
   | _ -> raise @@ Invalid_argument "not a mediabox"
 
 let from_pdf_page pdf page =
