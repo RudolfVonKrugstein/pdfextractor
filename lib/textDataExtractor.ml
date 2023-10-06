@@ -5,6 +5,22 @@ type t = {
   text_width : int list -> string -> float;
 }
 
+(* use this char width if nothing else is found*)
+let fallback_char_width = 400.0
+
+let get_simple_font_char_widths (simple_font : Pdftext.simple_font) code =
+  (* try via the 'width' member *)
+  try float_of_int @@ simple_font.widths.(code - simple_font.firstchar)
+  with Invalid_argument _ -> (
+    match simple_font.fontmetrics with
+    | None -> fallback_char_width
+    | Some metrics -> (
+        (* try to get the width from the matrics *)
+        try metrics.(code)
+        with (* nothing found, use fallback *)
+        | Invalid_argument _ ->
+          fallback_char_width))
+
 let create font font_size =
   let text_width =
     match font with
@@ -14,15 +30,13 @@ let create font font_size =
           float_of_int milli_points *. font_size /. 1000.0
         in
         tw
-    | Pdftext.SimpleFont { widths = w; firstchar = fc; _ } ->
+    | Pdftext.SimpleFont simple_font ->
         let tw codes _ =
           let milli_points =
-            List.fold_left ( + ) 0
-            @@ List.map
-                 (fun c -> try w.(c - fc) with Invalid_argument _ -> 500)
-                 codes
+            List.fold_left ( +. ) 0.0
+            @@ List.map (get_simple_font_char_widths simple_font) codes
           in
-          float_of_int milli_points *. font_size /. 1000.0
+          milli_points *. font_size /. 1000.0
         in
         tw
     | Pdftext.CIDKeyedFont (_, { cid_widths = w; _ }, _) ->
