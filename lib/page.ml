@@ -16,3 +16,18 @@ let from_pdf_page pdf page =
   let operators = Pdfops.parse_operators pdf page.resources page.content in
   let text = TextElement.list_from_pdf_ops fc_cache operators in
   { bounds; text }
+
+let to_json page =
+  let (x, y), (w, h) = page.bounds in
+  `Assoc
+    [
+      ( "bounding_box",
+        `Assoc
+          [
+            ("x", `Float x);
+            ("y", `Float y);
+            ("w", `Float w);
+            ("h", `Float h);
+            ("text", `List (List.map TextElement.to_json page.text));
+          ] );
+    ]

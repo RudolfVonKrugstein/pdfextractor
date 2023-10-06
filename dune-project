@@ -17,7 +17,7 @@
  (name pdfextractor)
  (synopsis "A short synopsis")
  (description "A longer description")
- (depends ocaml dune camlpdf cairo2)
+ (depends ocaml dune camlpdf cairo2 yojson)
  (tags
   (topics "to describe" your project)))
 

@@ -6,3 +6,4 @@ type t = {
 }
 
 val list_from_pdf_ops : FontCache.t -> Pdfops.t list -> t list
+val to_json : t -> Yojson.t

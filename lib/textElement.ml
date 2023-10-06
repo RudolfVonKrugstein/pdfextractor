@@ -69,3 +69,14 @@ let rec from_pdf_ops_rec fc text_state (ops : Pdfops.t list) =
           from_pdf_ops_rec fc next_state ops (* no new element, continue *))
 
 let list_from_pdf_ops fc ops = from_pdf_ops_rec fc TextState.initial ops
+
+let to_json (te : t) =
+  `Assoc
+    [
+      ("text", `String te.text);
+      ("bounding_box", BoundingBox.to_json te.bounding_box);
+      ( "font",
+        match te.font_info with
+        | Some f -> FontInfo.to_json f
+        | None -> `String "no font" );
+    ]

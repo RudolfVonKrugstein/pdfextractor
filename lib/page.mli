@@ -4,3 +4,4 @@ type t = {
 }
 
 val from_pdf_page : Pdf.t -> Pdfpage.t -> t
+val to_json : t -> Yojson.t

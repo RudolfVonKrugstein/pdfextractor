@@ -8,6 +8,16 @@ type text_mode =
   | FillThenStrokeAndClip
   | Clip
 
+let text_mode_to_string = function
+  | Fill -> "Fill"
+  | Stroke -> "Stroke"
+  | FillThenStroke -> "FillThenStroke"
+  | Invisible -> "Invisible"
+  | FillAndClip -> "FillAndClip"
+  | StokeAndClip -> "StokeAndClip"
+  | FillThenStrokeAndClip -> "FillThenStrokeAndClip"
+  | Clip -> "Clip"
+
 type t = { name : string; size : float; flags : int; mode : text_mode }
 
 let create (font : Pdftext.font) size mode =
@@ -43,3 +53,11 @@ let create (font : Pdftext.font) size mode =
         flags = font.cid_fontdescriptor.flags;
         mode;
       }
+
+let to_json (fi : t) =
+  `Assoc
+    [
+      ("name", `String fi.name);
+      ("size", `Float fi.size);
+      ("text_mode", `String (text_mode_to_string fi.mode));
+    ]
