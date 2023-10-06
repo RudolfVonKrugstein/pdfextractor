@@ -14,10 +14,10 @@ let print_page index (page : Page.t) =
   Cairo.rectangle cr 0.0 0.0 ~w ~h;
   Cairo.fill cr;
   Cairo.set_line_width cr 1.0;
-  Cairo.set_source_rgb cr 0. 0. 0.;
   List.iter
     (fun (t : TextElement.t) ->
       let (x1, y1), (x2, y2), (x3, y3), (x4, y4) = t.bounding_box in
+      Cairo.set_source_rgb cr 1. 0. 0.;
       Cairo.move_to cr x1 (h -. y1);
       Cairo.line_to cr x2 (h -. y2);
       Cairo.line_to cr x3 (h -. y3);
@@ -25,9 +25,10 @@ let print_page index (page : Page.t) =
       Cairo.line_to cr x1 (h -. y1);
       Cairo.stroke cr;
       Cairo.move_to cr x1 (h -. y1);
+      Cairo.set_source_rgb cr 0. 0. 0.;
       Cairo.show_text cr t.text)
     page.text;
-  (* write the overview png*)
+  (* write the overview png *)
   Cairo.PNG.write surface @@ Printf.sprintf "page%i.png" index;
   (* write the data json *)
   Yojson.to_file (Printf.sprintf "page%i.json" index) (Page.to_json page)
