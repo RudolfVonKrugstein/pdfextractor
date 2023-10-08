@@ -1,3 +1,4 @@
 (library
+ (public_name pdfextractor)
  (name pdfextractor)
- (libraries camlpdf yojson))
+ (libraries camlpdf yojson str))
