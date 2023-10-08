@@ -9,3 +9,7 @@ let load_maybe_encrypted_pdf file_name password =
     | None -> raise @@ LoadingFailed
     | Some pdf -> pdf
   else pdf
+
+let load_pages_from_maybe_encrypted_pdf file_name password =
+  let pdf = load_maybe_encrypted_pdf file_name password in
+  List.map (Page.from_pdf_page pdf) (Pdfpage.pages_of_pagetree pdf)
