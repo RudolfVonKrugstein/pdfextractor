@@ -16,7 +16,7 @@ let print_page index (page : Page.t) =
   Cairo.set_line_width cr 1.0;
   List.iter
     (fun (t : TextElement.t) ->
-      let (x1, y1), (x2, y2), (x3, y3), (x4, y4) = t.bounding_box in
+      let (x1, y1), (x2, y2), (x3, y3), (x4, y4) = t.bounding_box.rotated in
       Cairo.set_source_rgb cr 1. 0. 0.;
       Cairo.move_to cr x1 (h -. y1);
       Cairo.line_to cr x2 (h -. y2);
