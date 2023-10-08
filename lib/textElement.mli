@@ -1,5 +1,5 @@
 type t = {
-  font_info : FontInfo.t option;
+  font_info : FontInfo.t;
   text : string;
   width : float;
   bounding_box : BoundingBox.t;

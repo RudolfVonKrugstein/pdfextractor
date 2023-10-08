@@ -29,7 +29,7 @@ val with_font : t -> Pdftext.font option -> float -> t
 val with_text_mode : t -> int -> t
 val with_horizontal_scale : t -> float -> t
 val with_rise : t -> float -> t
-val font_info : t -> FontInfo.t option
+val font_info : t -> FontInfo.t
 val font_range : t -> float * float
 (* the range of the font vertically *)
 

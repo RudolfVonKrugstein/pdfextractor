@@ -94,9 +94,10 @@ let get_text_and_advance text_state (obj : Pdf.pdfobject) =
       (text, width *. text_state.horizontal_scale)
 
 let font_info text_state =
-  Option.map
-    (fun f -> FontInfo.create f text_state.font_size text_state.text_mode)
-    text_state.font
+  match text_state.font with
+  | Some f -> FontInfo.create f text_state.font_size text_state.text_mode
+  | None ->
+      raise @@ Invalid_argument "no font loaded yet, cannot create font info"
 
 let font_range_from_descriptor (d : Pdftext.fontdescriptor) =
   if abs_float (d.ascent -. d.descent) > 0.1 then (d.ascent, d.descent)
@@ -121,9 +122,7 @@ let font_range text_state =
   if abs_float (milli_acent -. milli_descent) > 0.1 then
     ( (text_state.font_size *. milli_acent /. 1000.0) +. text_state.rise,
       (text_state.font_size *. milli_descent /. 1000.0) +. text_state.rise )
-  else (
-    print_endline "the same";
-    (text_state.font_size, 0.0))
+  else (text_state.font_size, 0.0)
 
 let apply_text_transform text_state (x, y) =
   Pdftransform.transform_matrix text_state.text_matrix (x, y)

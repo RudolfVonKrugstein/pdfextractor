@@ -1,5 +1,5 @@
 type t = {
-  font_info : FontInfo.t option;
+  font_info : FontInfo.t;
   text : string;
   width : float;
   bounding_box : BoundingBox.t;
@@ -75,8 +75,5 @@ let to_json (te : t) =
     [
       ("text", `String te.text);
       ("bounding_box", BoundingBox.to_json te.bounding_box);
-      ( "font",
-        match te.font_info with
-        | Some f -> FontInfo.to_json f
-        | None -> `String "no font" );
+      ("font", FontInfo.to_json te.font_info);
     ]
