@@ -19,6 +19,14 @@
  (name pdfextractor)
  (synopsis "Extract text from pdfs")
  (description "Extract text and positioning information from pdfs")
- (depends ocaml dune camlpdf cairo2 yojson))
+ (depends
+  (ocaml
+   (>= 5.2.0))
+  (ocamlformat
+   (>= 0.26.1))
+  dune
+  camlpdf
+  cairo2
+  yojson))
 
 ; See the complete stanza docs at https://dune.readthedocs.io/en/stable/dune-files.html#dune-project

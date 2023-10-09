@@ -9,7 +9,8 @@ homepage: "https://github.com/RudolfVonKrugstein/pdfextractor"
 doc: "https://url/to/documentation"
 bug-reports: "https://github.com/RudolfVonKrugstein/pdfextractor/issues"
 depends: [
-  "ocaml"
+  "ocaml" {>= "5.1.0"}
+  "ocamlformat" {>= "0.26.1"}
   "dune" {>= "3.10"}
   "camlpdf"
   "cairo2"
