@@ -56,22 +56,22 @@ let complete_right_of a b =
 let above a b =
   let { aaligned = (_, a_y1), (_, a_y2); _ } = a in
   let { aaligned = (_, b_y1), (_, b_y2); _ } = b in
-  b_y1 < a_y1 && b_y2 < a_y2 && horiz_overlap a b
+  a_y1 < b_y1 && a_y2 < b_y2 && horiz_overlap a b
 
 let complete_above a b =
-  let { aaligned = (_, a_y1), _; _ } = a in
-  let { aaligned = _, (_, b_y2); _ } = b in
-  b_y2 < a_y1 && horiz_overlap a b
+  let { aaligned = (_, a_y2), _; _ } = a in
+  let { aaligned = _, (b_y1, _); _ } = b in
+  a_y2 < b_y1 && horiz_overlap a b
 
 let below a b =
   let { aaligned = (_, a_y1), (_, a_y2); _ } = a in
   let { aaligned = (_, b_y1), (_, b_y2); _ } = b in
-  b_y1 > a_y1 && b_y2 > a_y2 && horiz_overlap a b
+  a_y1 > b_y1 && a_y2 > b_y2 && horiz_overlap a b
 
 let complete_below a b =
-  let { aaligned = _, (_, a_y2); _ } = a in
-  let { aaligned = (_, b_y1), _; _ } = b in
-  a_y2 < b_y1 && horiz_overlap a b
+  let { aaligned = _, (a_y1, _); _ } = a in
+  let { aaligned = (_, b_y2), _; _ } = b in
+  a_y1 > b_y2 && horiz_overlap a b
 
 let leftmost = function
   | [] -> None
