@@ -4,6 +4,10 @@ type t = {
   aaligned : (float * float) * (float * float);
 }
 
+let to_aaligned_string t =
+  let (x1, y1), (x2, y2) = t.aaligned in
+  Format.sprintf "(%f,%f)-(%f-%f)" x1 y1 x2 y2
+
 let find_bb rotated =
   let max lst = List.fold_left max min_float lst in
   let min lst = List.fold_left min max_float lst in
@@ -33,45 +37,61 @@ let vert_overlap { aaligned = (_, a_y1), (_, a_y2); _ }
 
 let overlap a b = vert_overlap a b && horiz_overlap a b
 
-let left_of a b =
+let more_left a b =
   let { aaligned = (a_x1, _), (a_x2, _); _ } = a in
   let { aaligned = (b_x1, _), (b_x2, _); _ } = b in
-  b_x1 < a_x1 && b_x2 < a_x2 && vert_overlap a b
+  b_x1 < a_x1 && b_x2 < a_x2
 
-let complete_left_of a b =
+let left_of a b = more_left a b && vert_overlap a b
+
+let complete_more_left a b =
   let { aaligned = (a_x1, _), _; _ } = a in
   let { aaligned = _, (b_x2, _); _ } = b in
-  b_x2 <= a_x1 && vert_overlap a b
+  b_x2 <= a_x1
 
-let right_of a b =
+let complete_left_of a b = complete_more_left a b && vert_overlap a b
+
+let more_right a b =
   let { aaligned = (a_x1, _), (a_x2, _); _ } = a in
   let { aaligned = (b_x1, _), (b_x2, _); _ } = b in
-  b_x1 > a_x1 && b_x2 > a_x2 && vert_overlap a b
+  b_x1 > a_x1 && b_x2 > a_x2
 
-let complete_right_of a b =
+let right_of a b = more_right a b && vert_overlap a b
+
+let complete_more_right a b =
   let { aaligned = _, (a_x2, _); _ } = a in
   let { aaligned = (b_x1, _), _; _ } = b in
-  b_x1 >= a_x2 && vert_overlap a b
+  b_x1 >= a_x2
 
-let above a b =
+let complete_right_of a b = complete_more_right a b && vert_overlap a b
+
+let higher a b =
   let { aaligned = (_, a_y1), (_, a_y2); _ } = a in
   let { aaligned = (_, b_y1), (_, b_y2); _ } = b in
-  a_y1 < b_y1 && a_y2 < b_y2 && horiz_overlap a b
+  a_y1 < b_y1 && a_y2 < b_y2
 
-let complete_above a b =
+let above a b = higher a b && horiz_overlap a b
+
+let complete_higher a b =
   let { aaligned = (_, a_y2), _; _ } = a in
   let { aaligned = _, (_, b_y1); _ } = b in
-  a_y2 < b_y1 && horiz_overlap a b
+  a_y2 < b_y1
 
-let below a b =
+let complete_above a b = complete_higher a b && horiz_overlap a b
+
+let lower a b =
   let { aaligned = (_, a_y1), (_, a_y2); _ } = a in
   let { aaligned = (_, b_y1), (_, b_y2); _ } = b in
-  a_y1 > b_y1 && a_y2 > b_y2 && horiz_overlap a b
+  a_y1 > b_y1 && a_y2 > b_y2
 
-let complete_below a b =
+let below a b = lower a b && horiz_overlap a b
+
+let complete_lower a b =
   let { aaligned = _, (_, a_y1); _ } = a in
   let { aaligned = (_, b_y2), _; _ } = b in
-  a_y1 > b_y2 && horiz_overlap a b
+  a_y1 > b_y2
+
+let complete_below a b = complete_lower a b && horiz_overlap a b
 
 let leftmost = function
   | [] -> None
