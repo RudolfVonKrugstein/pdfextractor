@@ -71,16 +71,16 @@ let rec extreme_pos (cmp : BoundingBox.t -> BoundingBox.t -> bool)
       extreme_pos cmp cs next_winner
 
 let leftmost candidates =
-  extreme_pos (fun a b -> BoundingBox.left_of b a) candidates None
+  extreme_pos (fun a b -> BoundingBox.more_left b a) candidates None
 
 let rightmost candidates =
-  extreme_pos (fun a b -> BoundingBox.right_of b a) candidates None
+  extreme_pos (fun a b -> BoundingBox.more_right b a) candidates None
 
 let topmost candidates =
-  extreme_pos (fun a b -> BoundingBox.above b a) candidates None
+  extreme_pos (fun a b -> BoundingBox.higher b a) candidates None
 
 let bottommost candidates =
-  extreme_pos (fun a b -> BoundingBox.below b a) candidates None
+  extreme_pos (fun a b -> BoundingBox.lower b a) candidates None
 
 let move_left ?(no_overlap = false) ?(f = fun _ -> true) i =
   let candidates =
